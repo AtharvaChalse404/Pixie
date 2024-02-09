@@ -3,21 +3,21 @@ import pyttsx3
 import datetime
 import pyowm
 
-
+# Initialize speech recognition
 recognizer = sr.Recognizer()
 
+# Initialize text to speech engine with the 'sapi5' driver
 engine = pyttsx3.init(driverName='sapi5')
 engine.setProperty('rate', 150)
 
-
+# Get available voices and select a female voice
 voices = engine.getProperty('voices')
-
 for voice in voices:
-    if "" in voice.name.lower():
+    if "female" in voice.name.lower():
         engine.setProperty('voice', voice.id)
         break
 
-
+# Initialize OpenWeatherMap API with default API key
 owm = pyowm.OWM('c1bd515a0989b3f62208ef09c0ddb61d') 
 
 def speak(text):
@@ -39,7 +39,7 @@ def assistant():
     with sr.Microphone() as source:
         print("Listening...")
         recognizer.adjust_for_ambient_noise(source)
-        audio = recognizer.listen(source)
+        audio = recognizer.listen(source, timeout=5)  # Set timeout to 5 seconds
 
     try:
         print("Recognizing...")
@@ -48,9 +48,10 @@ def assistant():
 
         if 'weather' in query:
             speak("Please tell me the city name.")
-            city_name = recognizer.listen(source)
-            city = recognizer.recognize_google(city_name)
-            weather_info = get_weather(city)
+            city_name_audio = recognizer.listen(source, timeout=5)  # Set timeout to 5 seconds
+            city_name = recognizer.recognize_google(city_name_audio).lower()
+            print("User's City:", city_name)
+            weather_info = get_weather(city_name)
             speak(weather_info)
         elif 'time' in query:
             current_time = get_time()
@@ -61,9 +62,10 @@ def assistant():
         else:
             speak("Sorry, I couldn't understand the command.")
 
-    except Exception as e:
-        print(e)
-        speak("Sorry, I couldn't understand the command.")
+    except sr.UnknownValueError:
+        speak("Sorry, I couldn't understand the command. Please try again.")
+    except sr.RequestError:
+        speak("Sorry, I'm unable to access the speech recognition service at the moment. Please try again later.")
 
 if __name__ == "__main__":
     speak("Hello! I am Pixie. How can I assist you today?")
