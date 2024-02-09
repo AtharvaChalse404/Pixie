@@ -3,23 +3,21 @@ import pyttsx3
 import datetime
 import pyowm
 
-# Initialize speech recognition
+
 recognizer = sr.Recognizer()
 
-# Initialize text to speech engine with the 'nsss' driver
 engine = pyttsx3.init(driverName='sapi5')
 engine.setProperty('rate', 150)
 
-# Get all available voices
+
 voices = engine.getProperty('voices')
 
-# Select a female voice
 for voice in voices:
-    if "female" in voice.name.lower():
+    if "" in voice.name.lower():
         engine.setProperty('voice', voice.id)
         break
 
-# Initialize OpenWeatherMap API
+
 owm = pyowm.OWM('c1bd515a0989b3f62208ef09c0ddb61d') 
 
 def speak(text):
