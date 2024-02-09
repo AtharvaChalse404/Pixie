@@ -36,19 +36,20 @@ def get_time():
     return f"The current time is {now.strftime('%I:%M %p')}"
 
 def assistant():
-    with sr.Microphone() as source:
-        print("Listening...")
-        recognizer.adjust_for_ambient_noise(source)
-        audio = recognizer.listen(source, timeout=5)  # Set timeout to 5 seconds
-
     try:
+        with sr.Microphone() as source:
+            print("Listening...")
+            recognizer.adjust_for_ambient_noise(source)
+            audio = recognizer.listen(source, timeout=5)  # Set timeout to 5 seconds
+
         print("Recognizing...")
         query = recognizer.recognize_google(audio).lower()
         print("User:", query)
 
         if 'weather' in query:
             speak("Please tell me the city name.")
-            city_name_audio = recognizer.listen(source, timeout=5)  # Set timeout to 5 seconds
+            with sr.Microphone() as city_source:
+                city_name_audio = recognizer.listen(city_source, timeout=5)  # Set timeout to 5 seconds
             city_name = recognizer.recognize_google(city_name_audio).lower()
             print("User's City:", city_name)
             weather_info = get_weather(city_name)
