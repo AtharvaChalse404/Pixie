@@ -1,34 +1,24 @@
 import speech_recognition as sr
 import pyttsx3
 import datetime
-import pyowm
+from pyowm import OWM
 
-# Initialize speech recognition
 recognizer = sr.Recognizer()
-
-# Initialize text to speech engine with the 'sapi5' driver
 engine = pyttsx3.init(driverName='sapi5')
 engine.setProperty('rate', 150)
 
-# Get available voices and select a female voice
-voices = engine.getProperty('voices')
-for voice in voices:
-    if "female" in voice.name.lower():
-        engine.setProperty('voice', voice.id)
-        break
-
-# Initialize OpenWeatherMap API with default API key
-owm = pyowm.OWM('c1bd515a0989b3f62208ef09c0ddb61d') 
+owm = OWM('')
+weather_manager = owm.weather_manager()
 
 def speak(text):
     engine.say(text)
     engine.runAndWait()
 
 def get_weather(city):
-    observation = owm.weather_at_place(city)
-    w = observation.get_weather()
-    temperature = w.get_temperature('celsius')['temp']
-    status = w.get_detailed_status()
+    observation = weather_manager.weather_at_place(city)
+    w = observation.weather
+    temperature = w.temperature('celsius')['temp']
+    status = w.detailed_status
     return f"The weather in {city} is {status} with a temperature of {temperature} degrees Celsius."
 
 def get_time():
@@ -40,20 +30,26 @@ def assistant():
         with sr.Microphone() as source:
             print("Listening...")
             recognizer.adjust_for_ambient_noise(source)
-            audio = recognizer.listen(source, timeout=5)  # Set timeout to 5 seconds
+            audio = recognizer.listen(source, timeout=5)
 
         print("Recognizing...")
-        query = recognizer.recognize_google(audio).lower()
+        query = recognizer.recognize_google(audio, language='en-IN').lower()
         print("User:", query)
 
         if 'weather' in query:
-            speak("Please tell me the city name.")
-            with sr.Microphone() as city_source:
-                city_name_audio = recognizer.listen(city_source, timeout=5)  # Set timeout to 5 seconds
-            city_name = recognizer.recognize_google(city_name_audio).lower()
-            print("User's City:", city_name)
-            weather_info = get_weather(city_name)
-            speak(weather_info)
+            city_name = None
+            for word in query.split():
+                if word.isalpha():
+                    city_name = word
+                    break
+
+            if city_name:
+                print("User's City:", city_name)
+                weather_info = get_weather(city_name)
+                speak(weather_info)
+            else:
+                speak("Please specify the city name along with the question.")
+
         elif 'time' in query:
             current_time = get_time()
             speak(current_time)
@@ -61,12 +57,15 @@ def assistant():
             speak("Goodbye!")
             exit()
         else:
-            speak("Sorry, I couldn't understand the command.")
+            speak("Sorry, I couldn't understand the command in .")
 
     except sr.UnknownValueError:
-        speak("Sorry, I couldn't understand the command. Please try again.")
+        speak("Sorry, I couldn't understand the command in . Please try again.")
     except sr.RequestError:
         speak("Sorry, I'm unable to access the speech recognition service at the moment. Please try again later.")
+    except Exception as e:
+        print(e)
+        speak("An error occurred. Please try again later.")
 
 if __name__ == "__main__":
     speak("Hello! I am Pixie. How can I assist you today?")
