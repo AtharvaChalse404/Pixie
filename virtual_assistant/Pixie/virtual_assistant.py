@@ -7,7 +7,7 @@ recognizer = sr.Recognizer()
 engine = pyttsx3.init(driverName='sapi5')
 engine.setProperty('rate', 150)
 
-owm = OWM('')
+owm = OWM('c1bd515a0989b3f62208ef09c0ddb61d')
 weather_manager = owm.weather_manager()
 
 def speak(text):
