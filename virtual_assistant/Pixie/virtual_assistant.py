@@ -7,7 +7,7 @@ import requests
 url = 'https://api.tomorrow.io/v4/weather/forecast'
 
 # Define the API key
-api_key = 'YOUR_API_KEY_HERE'
+api_key = 'Y6R8nxCOta5BBKuFhqQDi2wCh8K52wB11'
 
 # Initialize speech recognition
 recognizer = sr.Recognizer()
